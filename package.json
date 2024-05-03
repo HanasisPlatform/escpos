@@ -1,5 +1,5 @@
 {
-  "name": "escpos",
+  "name": "@hanasis/escpos",
   "version": "3.0.0-alpha.6",
   "description": "ESC/POS Printer driver for nodejs",
   "main": "index.js",
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/song940/node-escpos.git"
+    "url": "git+https://github.com/HanasisPlatform/escpos.git"
   },
   "keywords": [
     "escpos",
     "printer"
   ],
-  "author": "Lsong <hi@lsong.org> (https://lsong.org)",
+  "author": "Lsong <hi@lsong.org> (https://lsong.org), Hanasis Platform <platform@hanasis.com> (https://www.hanasis.com)",
   "contributors": [
     "Jose Vera <hola@jose.com.co>",
     "Sébastien Vidal <Psychopoulet@GitHub.com>",
@@ -25,9 +25,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/song940/node-escpos/issues"
+    "url": "https://github.com/HanasisPlatform/escpos/issues"
   },
-  "homepage": "https://github.com/song940/node-escpos#readme",
+  "homepage": "https://github.com/HanasisPlatform/escpos#readme",
   "dependencies": {
     "get-pixels": "*",
     "iconv-lite": "*",
