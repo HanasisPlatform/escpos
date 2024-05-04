@@ -12,6 +12,8 @@
 #       The content near Printer.prototype.close = function (callback, options) has been modified.
       3.0.0-alpha.6c 
 #       Printer.prototype.buffer function added
+      3.0.0-alpha.6d 
+#       Check to this.adapter
 */
 
 
@@ -803,7 +805,7 @@ Printer.prototype.beep = function (n, t) {
  */
 Printer.prototype.flush = function (callback) {
   var buf = this.buffer.flush();
-  this.adapter.write(buf, callback);
+  if (this.adapter && this.adapter.write) this.adapter.write(buf, callback);
   return this;
 };
 
@@ -836,14 +838,16 @@ Printer.prototype.buffer = function () {
 Printer.prototype.close = function (callback, options) {
   var self = this;
   return this.flush(function () {
-    if (self.adapter.close) {
-      self.adapter.close(callback, options);
-    } else
-    if (self.adapter.end) {
-      self.adapter.end();
-    } else
-    if (self.adapter.destroy) {
-      self.adapter.destroy();
+    if (self.adapter) {
+      if (self.adapter.close) {
+        self.adapter.close(callback, options);
+      } else
+      if (self.adapter.end) {
+        self.adapter.end();
+      } else
+      if (self.adapter.destroy) {
+        self.adapter.destroy();
+      }  
     }
   });
 };
@@ -900,18 +904,16 @@ Printer.prototype.raw = function raw(data) {
  * @return {Printer}
  */
 Printer.prototype.getStatus = function(statusClassName, callback) {
-  this.adapter.read(data => {
-    const byte = data.readInt8(0);
-
-    const status = new statuses[statusClassName](byte);
-
-    callback(status);
-  })
-
+  if (this.adapter) {
+    this.adapter.read(data => {
+      const byte = data.readInt8(0);  
+      const status = new statuses[statusClassName](byte);  
+      callback(status);
+    })  
+  }
   statuses[statusClassName].commands().forEach((c) => {
     this.buffer.write(c);
   });
-
   return this;
 }
 
@@ -923,52 +925,54 @@ Printer.prototype.getStatus = function(statusClassName, callback) {
  */
 Printer.prototype.getStatuses = function(callback) {
   let buffer = [];
-  this.adapter.read(data => {
-    for (let i = 0; i < data.byteLength; i++) {
-      buffer.push(data.readInt8(i));
-    }
-
-    if (buffer.length < 4) {
-      return;
-    }
-
-    let statuses = [];
-    for (let i = 0; i < buffer.length; i++) {
-      let byte = buffer[i];
-      switch (i) {
-        case 0:
-          statuses.push(new PrinterStatus(byte));
-          break;
-        case 1:
-          statuses.push(new RollPaperSensorStatus(byte));
-          break;
-        case 2:
-          statuses.push(new OfflineCauseStatus(byte));
-          break;
-        case 3  :
-          statuses.push(new ErrorCauseStatus(byte));
-          break;
+  if (this.adapter) {
+    this.adapter.read(data => {
+      for (let i = 0; i < data.byteLength; i++) {
+        buffer.push(data.readInt8(i));
       }
-    }
-
-    buffer = [];
-    callback(statuses);
-  })
+  
+      if (buffer.length < 4) {
+        return;
+      }
+  
+      let statuses = [];
+      for (let i = 0; i < buffer.length; i++) {
+        let byte = buffer[i];
+        switch (i) {
+          case 0:
+            statuses.push(new PrinterStatus(byte));
+            break;
+          case 1:
+            statuses.push(new RollPaperSensorStatus(byte));
+            break;
+          case 2:
+            statuses.push(new OfflineCauseStatus(byte));
+            break;
+          case 3  :
+            statuses.push(new ErrorCauseStatus(byte));
+            break;
+        }
+      }
+  
+      buffer = [];
+      callback(statuses);
+    })  
+  }
 
   PrinterStatus.commands().forEach((c) => {
-    this.adapter.write(c);
+    if (this.adapter) this.adapter.write(c);
   });
 
   RollPaperSensorStatus.commands().forEach((c) => {
-    this.adapter.write(c);
+    if (this.adapter) this.adapter.write(c);
   });
 
   OfflineCauseStatus.commands().forEach((c) => {
-    this.adapter.write(c);
+    if (this.adapter) this.adapter.write(c);
   });
 
   ErrorCauseStatus.commands().forEach((c) => {
-    this.adapter.write(c);
+    if (this.adapter) this.adapter.write(c);
   });
 
   return this;
