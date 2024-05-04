@@ -10,6 +10,8 @@
 #  - 2024.05.04
       3.0.0-alpha.6b 
 #       The content near Printer.prototype.close = function (callback, options) has been modified.
+      3.0.0-alpha.6c 
+#       Printer.prototype.buffer function added
 */
 
 
@@ -817,6 +819,13 @@ Printer.prototype.cut = function (part, feed) {
   ]);
   return this;
 };
+
+
+Printer.prototype.buffer = function () {
+  return this.buffer;
+};
+
+
 
 /**
  * [close description]
