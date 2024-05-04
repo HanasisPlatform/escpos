@@ -1,3 +1,18 @@
+/*
+#  Hanasis Endpoint Sales Platform
+#  ESPHost
+#  host-api.js
+#
+# This project is modifying and adding features based on https://www.npmjs.com/package/escpos 3.0.0-alpha.6
+#
+#  Maintenance by Hanasis Co., Ltd.
+#  Gyuyoung Kang updated the code from May 1, 2024.
+#  - 2024.05.04
+      3.0.0-alpha.6b 
+#       The content near Printer.prototype.close = function (callback, options) has been modified.
+*/
+
+
 'use strict';
 const util = require('util');
 const qr = require('qr-image');
@@ -812,7 +827,15 @@ Printer.prototype.cut = function (part, feed) {
 Printer.prototype.close = function (callback, options) {
   var self = this;
   return this.flush(function () {
-    self.adapter.close(callback, options);
+    if (self.adapter.close) {
+      self.adapter.close(callback, options);
+    } else
+    if (self.adapter.end) {
+      self.adapter.end();
+    } else
+    if (self.adapter.destroy) {
+      self.adapter.destroy();
+    }
   });
 };
 

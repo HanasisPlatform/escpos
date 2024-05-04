@@ -1,3 +1,7 @@
+# Notice
+### This project is modifying and adding features based on https://www.npmjs.com/package/escpos 3.0.0-alpha.6
+
+#
 # ESCPOS
 
 ESC/POS Printer driver for node
@@ -10,12 +14,12 @@ ESC/POS Printer driver for node
 
 ### npm
 ```bash
-$ npm i escpos --save
+$ npm i @hanasis/escpos --save
 ```
 
 ### yarn
 ```bash
-$ yarn add escpos
+$ yarn add @hanasis/escpos
 ```
 
 if you use usb as an adapter :
@@ -29,7 +33,7 @@ Otherwise you will get `LIBUSB_ERROR_NOT_SUPPORTED` when attempting to open devi
 ## Example
 
 ````javascript
-const escpos = require('escpos');
+const escpos = require('@hanasis/escpos');
 // install escpos-usb adapter module manually
 escpos.USB = require('escpos-usb');
 // Select the adapter based on your printer type
