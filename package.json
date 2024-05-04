@@ -1,6 +1,6 @@
 {
   "name": "@hanasis/escpos",
-  "version": "3.0.0-alpha.6d",
+  "version": "3.0.0-alpha.6e",
   "description": "ESC/POS Printer driver for nodejs",
   "main": "index.js",
   "scripts": {

@@ -11,8 +11,8 @@
       3.0.0-alpha.6b 
 #       The content near Printer.prototype.close = function (callback, options) has been modified.
       3.0.0-alpha.6c 
-#       Printer.prototype.buffer function added
-      3.0.0-alpha.6d 
+#       Printer.prototype.getBuffer function added
+      3.0.0-alpha.6e 
 #       Check to this.adapter
 */
 
@@ -823,7 +823,7 @@ Printer.prototype.cut = function (part, feed) {
 };
 
 
-Printer.prototype.buffer = function () {
+Printer.prototype.getBuffer = function () {
   return this.buffer;
 };
 
