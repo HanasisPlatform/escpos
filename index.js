@@ -14,8 +14,10 @@
 #       Printer.prototype.getBuffer function added
       3.0.0-alpha.6e 
 #       Check to this.adapter
+      3.0.0-alpha.6f 
+        _lineBuff, clearTextLine, leftTextLine, centerTextLine, rightTextLine, flushTextLine
+#       
 */
-
 
 'use strict';
 const util = require('util');
@@ -48,6 +50,7 @@ function Printer(adapter, options) {
   this.encoding = options && options.encoding || 'GB18030';
   this.width = options && options.width || 48;
   this._model = null;
+  this._lineBuff = null;
 };
 
 Printer.create = function (device) {
@@ -119,6 +122,64 @@ Printer.prototype.marginRight = function (size) {
   this.buffer.writeUInt8(size);
   return this;
 };
+
+
+/**
+ * Clear line buffer and fill
+ * @param  {[String]} fill
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.clearTextLine = function (fill) {
+  this._lineBuff = new Array(this.width + 1).join(fill || " ");
+  return this;
+}
+/**
+ * Place it based on the left side of the text line buffer. 
+ * @param  {[String]}  content  [mandatory]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.leftTextLine = function (content) {
+  this._lineBuff = content + this._lineBuff.substring(content.length);
+  return this;
+}
+/**
+ * Place it based on the center of the text line buffer. 
+ * @param  {[String]}  content  [mandatory]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.centerTextLine = function (content) {
+  let pos = this.width - content.length;
+  let mos = 0;
+  if (pos % 2 == 1) {
+    pos += 1;
+    mos = 1;
+  }    
+  this._lineBuff = this._lineBuff.substring(0, pos / 2) + content + this._lineBuff.substring(this.width - (pos / 2 - mos));
+  return this;
+}
+/**
+ * Place it based on the right side of the text line buffer. 
+ * @param  {[String]}  content  [mandatory]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.rightTextLine = function (content) {
+  var pos = this.width - content.length;
+  if (pos < 0) {
+    content = content.substring(pos * -1);
+    pos = 0;
+  }
+  this._lineBuff = this._lineBuff.substring(0, pos) + content;
+  return this;
+}
+/**
+ * Flushes the text line buffer to the printer with EOL.
+ * @param  {[String]}  encoding  [options]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.flushTextLine = function (encoding) {
+  return this.print(iconv.encode(this._lineBuff + _.EOL, encoding || this.encoding));
+}
+
 
 /**
  * [function print]
