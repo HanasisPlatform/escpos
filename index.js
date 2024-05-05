@@ -14,7 +14,7 @@
 #       Printer.prototype.getBuffer function added
       3.0.0-alpha.6e 
 #       Check to this.adapter
-      3.0.0-alpha.6f 
+      3.0.0-alpha.6h 
         _lineBuff, clearTextLine, leftTextLine, centerTextLine, rightTextLine, flushTextLine
 #       
 */
@@ -51,6 +51,8 @@ function Printer(adapter, options) {
   this.width = options && options.width || 48;
   this._model = null;
   this._lineBuff = null;
+  this.fontwidth = 1;
+  this.fontheight = 1;
 };
 
 Printer.create = function (device) {
@@ -130,7 +132,7 @@ Printer.prototype.marginRight = function (size) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.clearTextLine = function (fill) {
-  this._lineBuff = new Array(this.width + 1).join(fill || " ");
+  this._lineBuff = new Array(this.width / this.fontwidth + 1).join(fill || " ");
   return this;
 }
 /**
@@ -148,27 +150,28 @@ Printer.prototype.leftTextLine = function (content) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.centerTextLine = function (content) {
-  let pos = this.width - content.length;
+  let pos = this.width / this.fontwidth - content.length;
   let mos = 0;
   if (pos % 2 == 1) {
     pos += 1;
     mos = 1;
   }    
-  this._lineBuff = this._lineBuff.substring(0, pos / 2) + content + this._lineBuff.substring(this.width - (pos / 2 - mos));
+  this._lineBuff = this._lineBuff.substring(0, pos / 2) + content + this._lineBuff.substring(this.width / this.fontwidth - (pos / 2 - mos));
   return this;
 }
+
 /**
  * Place it based on the right side of the text line buffer. 
  * @param  {[String]}  content  [mandatory]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-Printer.prototype.rightTextLine = function (content) {
-  var pos = this.width - content.length;
+Printer.prototype.rightTextLine = function (content, offset) {
+  var pos = (this.width / this.fontwidth) - (offset != null ? offset : 0) - content.length;
   if (pos < 0) {
     content = content.substring(pos * -1);
     pos = 0;
   }
-  this._lineBuff = this._lineBuff.substring(0, pos) + content;
+  this._lineBuff = this._lineBuff.substring(0, pos) + content + ((offset != null && offset > 0) ? this._lineBuff.substring(this.width / this.fontwidth - offset) : "");
   return this;
 }
 /**
@@ -178,6 +181,15 @@ Printer.prototype.rightTextLine = function (content) {
  */
 Printer.prototype.flushTextLine = function (encoding) {
   return this.print(iconv.encode(this._lineBuff + _.EOL, encoding || this.encoding));
+}
+
+
+Printer.prototype.textLine = function (left, center, right, roffset, fill, encoding) {
+  this.clearTextLine(fill);
+  if (left != null) this.leftTextLine(""+left);
+  if (center != null) this.centerTextLine(""+center);
+  if (right != null) this.rightTextLine(""+right, roffset);
+  return this.flushTextLine(encoding);
 }
 
 
@@ -566,9 +578,9 @@ Printer.prototype.style = function (type) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.size = function (width, height) {
-  
+  this.fontwidth = (width == 1) ? 2 : 1;
+  this.fontheight = (height == 1) ? 2 : 1;  
   this.buffer.write(_.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height));
-
   return this;
 };
 
