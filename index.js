@@ -17,6 +17,9 @@
       3.0.0-alpha.6h 
         _lineBuff, clearTextLine, leftTextLine, centerTextLine, rightTextLine, flushTextLine
 #       
+      3.0.0-alpha.6i 
+        function Print draw double-line End Of Line
+#       
 */
 
 'use strict';
@@ -237,14 +240,25 @@ Printer.prototype.text = function (content, encoding) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.drawLine = function () {
-
-
   // this.newLine();
   for (var i = 0; i < this.width; i++) {
     this.buffer.write(Buffer.from("-"));
   }
   this.newLine();
+  return this;
+};
 
+/**
+ * [function Print draw double-line End Of Line]
+
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.drawDoubleLine = function () {
+  // this.newLine();
+  for (var i = 0; i < this.width; i++) {
+    this.buffer.write(Buffer.from("="));
+  }
+  this.newLine();
   return this;
 };
 
