@@ -144,6 +144,7 @@ Printer.prototype.clearTextLine = function (fill) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.leftTextLine = function (content) {
+  content = "" + content;
   this._lineBuff = content + this._lineBuff.substring(content.length);
   return this;
 }
@@ -153,6 +154,7 @@ Printer.prototype.leftTextLine = function (content) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.centerTextLine = function (content) {
+  content = "" + content;
   let pos = this.width / this.fontwidth - content.length;
   let mos = 0;
   if (pos % 2 == 1) {
@@ -169,6 +171,7 @@ Printer.prototype.centerTextLine = function (content) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.rightTextLine = function (content, offset) {
+  content = "" + content;
   var pos = (this.width / this.fontwidth) - (offset != null ? offset : 0) - content.length;
   if (pos < 0) {
     content = content.substring(pos * -1);
@@ -189,9 +192,9 @@ Printer.prototype.flushTextLine = function (encoding) {
 
 Printer.prototype.textLine = function (left, center, right, roffset, fill, encoding) {
   this.clearTextLine(fill);
-  if (left != null) this.leftTextLine(""+left);
-  if (center != null) this.centerTextLine(""+center);
-  if (right != null) this.rightTextLine(""+right, roffset);
+  if (left != null) this.leftTextLine(left);
+  if (center != null) this.centerTextLine(center);
+  if (right != null) this.rightTextLine(right, roffset);
   return this.flushTextLine(encoding);
 }
 
