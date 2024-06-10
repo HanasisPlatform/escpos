@@ -20,6 +20,12 @@
       3.0.0-alpha.6i 
         function Print draw double-line End Of Line
 #       
+#  - 2024.06.10
+      3.0.0-alpha.6k
+        function reduceSpacesByKoreanCount    
+      3.0.0-alpha.6m
+        function reduceSpacesAfterKorean   
+#       
 */
 
 'use strict';
@@ -36,6 +42,39 @@ const Promiseify = require('./promisify');
 const statuses = require('./statuses');
 const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} = statuses;
 
+function containsKorean(text) {
+  const koreanRegex = /[\uAC00-\uD7AF]/;
+  return koreanRegex.test(text);
+}
+function countKoreanCharacters(text) {
+  const koreanRegex = /[\uAC00-\uD7AF]/g;
+  const matches = text.match(koreanRegex);
+  return matches ? matches.length : 0;
+}
+function reduceSpacesByKoreanCount(text) {
+  const koreanCount = countKoreanCharacters(text);
+  return text.replace(/(\s+)/, (spaces) => {
+      const spacesToKeep = Math.max(spaces.length - koreanCount, 1); // 최소 하나의 공백은 유지
+      return ' '.repeat(spacesToKeep);
+  });
+}
+function reduceSpacesAfterKorean(text) {
+  // 한글 문장과 그 뒤의 공백 및 나머지 부분을 분리하는 정규 표현식
+  const parts = text.match(/(.*[가-힣]+)(\s+)(.*)/);
+  
+  if (!parts) {
+      return text; // 한글 문장이 없는 경우 원래 텍스트 반환
+  }
+
+  const koreanPart = parts[1]; // 한글 문장이 포함된 부분
+  const spaces = parts[2]; // 공백 부분
+  const rest = parts[3]; // 나머지 부분
+
+  const koreanCount = countKoreanCharacters(koreanPart);
+  const spacesToKeep = Math.max(spaces.length - koreanCount, 1); // 최소 하나의 공백은 유지
+
+  return koreanPart + ' '.repeat(spacesToKeep) + rest;
+}
 /**
  * [function ESC/POS Printer]
  * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
@@ -56,6 +95,7 @@ function Printer(adapter, options) {
   this._lineBuff = null;
   this.fontwidth = 1;
   this.fontheight = 1;
+  this.reduceAfterKorean = options && options.reduceAfterKorean || false;
 };
 
 Printer.create = function (device) {
@@ -186,6 +226,9 @@ Printer.prototype.rightTextLine = function (content, offset) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.flushTextLine = function (encoding) {
+  if (this.reduceAfterKorean===true) {
+    return this.print(iconv.encode(reduceSpacesAfterKorean(this._lineBuff) + _.EOL, encoding || this.encoding));
+  }
   return this.print(iconv.encode(this._lineBuff + _.EOL, encoding || this.encoding));
 }
 
