@@ -25,7 +25,9 @@
         function reduceSpacesByKoreanCount    
       3.0.0-alpha.6m
         function reduceSpacesAfterKorean   
-#       
+#  - 2024.06.13
+      3.0.0-alpha.6o
+        function reduceSpacesAfterKorean (Korean JaMo)
 */
 
 'use strict';
@@ -60,8 +62,7 @@ function reduceSpacesByKoreanCount(text) {
 }
 function reduceSpacesAfterKorean(text) {
   // 한글 문장과 그 뒤의 공백 및 나머지 부분을 분리하는 정규 표현식
-  const parts = text.match(/(.*[가-힣]+)(\s+)(.*)/);
-  
+  const parts = text.match(/(.*[가-힣ㄱ-ㅎㅏ-ㅣ]+)(\s+)(.*)/);
   if (!parts) {
       return text; // 한글 문장이 없는 경우 원래 텍스트 반환
   }
@@ -227,9 +228,9 @@ Printer.prototype.rightTextLine = function (content, offset) {
  */
 Printer.prototype.flushTextLine = function (encoding) {
   if (this.reduceAfterKorean===true) {
-    return this.print(iconv.encode(reduceSpacesAfterKorean(this._lineBuff) + _.EOL, encoding || this.encoding));
+    return this.print(iconv.encode(reduceSpacesAfterKorean(this._lineBuff).trimEnd() + _.EOL, encoding || this.encoding));
   }
-  return this.print(iconv.encode(this._lineBuff + _.EOL, encoding || this.encoding));
+  return this.print(iconv.encode(this._lineBuff.trimEnd() + _.EOL, encoding || this.encoding));
 }
 
 
