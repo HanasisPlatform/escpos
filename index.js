@@ -25,9 +25,13 @@
         function reduceSpacesByKoreanCount    
       3.0.0-alpha.6m
         function reduceSpacesAfterKorean   
-#  - 2024.06.13
-      3.0.0-alpha.6o
+#  - 2024.06.17
+      3.0.0-alpha.6q
         function reduceSpacesAfterKorean (Korean JaMo)
+
+#  - 2024.06.18
+      3.0.0-alpha.6r
+        function adjustSpaces (Korean JaMo)
 */
 
 'use strict';
@@ -45,11 +49,11 @@ const statuses = require('./statuses');
 const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} = statuses;
 
 function containsKorean(text) {
-  const koreanRegex = /[\uAC00-\uD7AF]/;
+  const koreanRegex = /(.*[가-힣ㄱ-ㅎㅏ-ㅣ]+)(\s+)(.*)/;
   return koreanRegex.test(text);
 }
 function countKoreanCharacters(text) {
-  const koreanRegex = /[\uAC00-\uD7AF]/g;
+  const koreanRegex = /[가-힣ㄱ-ㅎㅏ-ㅣ]/g;
   const matches = text.match(koreanRegex);
   return matches ? matches.length : 0;
 }
@@ -76,6 +80,22 @@ function reduceSpacesAfterKorean(text) {
 
   return koreanPart + ' '.repeat(spacesToKeep) + rest;
 }
+
+function adjustSpaces(input) {
+  // 한글 문자 갯수 세기
+  const hangulMatch = input.match(/[가-힣ㄱ-ㅎㅏ-ㅣ]/g);
+  const hangulCount = hangulMatch ? hangulMatch.length : 0;
+
+  // 정규 표현식으로 x1과 그 뒤의 공백을 찾아서 처리
+  const result = input.replace(/(x\d)(\s+)/, (match, p1, p2) => {
+      // 한글 문자 갯수만큼 공백 줄이기
+      const adjustedSpaces = p2.length - hangulCount;
+      return p1 + ' '.repeat(Math.max(adjustedSpaces, 1)); // 최소 1개의 공백 유지
+  });
+
+  return result;
+}
+
 /**
  * [function ESC/POS Printer]
  * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
@@ -228,7 +248,11 @@ Printer.prototype.rightTextLine = function (content, offset) {
  */
 Printer.prototype.flushTextLine = function (encoding) {
   if (this.reduceAfterKorean===true) {
-    return this.print(iconv.encode(reduceSpacesAfterKorean(this._lineBuff).trimEnd() + _.EOL, encoding || this.encoding));
+    let ss = reduceSpacesAfterKorean(this._lineBuff);
+    if (ss === this._lineBuff) {
+      ss = adjustSpaces(this._lineBuff);
+    }
+    return this.print(iconv.encode(ss.trimEnd() + _.EOL, encoding || this.encoding));
   }
   return this.print(iconv.encode(this._lineBuff.trimEnd() + _.EOL, encoding || this.encoding));
 }
