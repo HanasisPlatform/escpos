@@ -32,6 +32,10 @@
 #  - 2024.06.18
       3.0.0-alpha.6r
         function adjustSpaces (Korean JaMo)
+
+#  - 2024.07.25
+      3.0.0-alpha.6s
+        paper cut for epson
 */
 
 'use strict';
@@ -972,10 +976,10 @@ Printer.prototype.flush = function (callback) {
  * @param  {[type]} part [description]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-Printer.prototype.cut = function (part, feed) {
+Printer.prototype.cut = function (part, feed, epson) {
   this.feed(feed || 3);
   this.buffer.write(_.PAPER[
-    part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
+    epson ? (part ? 'EPSON_PART_CUT' : 'EPSON_FULL_CUT') : (part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT')
   ]);
   return this;
 };

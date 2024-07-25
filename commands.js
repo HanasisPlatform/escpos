@@ -94,6 +94,8 @@ _.PAPER = {
   PAPER_PART_CUT: '\x1d\x56\x01', // Partial cut paper
   PAPER_CUT_A: '\x1d\x56\x41', // Partial cut paper
   PAPER_CUT_B: '\x1d\x56\x42', // Partial cut paper
+  EPSON_FULL_CUT: '\x1b\x69', // Full cut paper
+  EPSON_PART_CUT: '\x1b\x6d', // Partial cut paper
 };
 
 /**
